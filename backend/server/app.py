@@ -1,18 +1,16 @@
+import os
+import logging
 from flask import Flask
 from flask_cors import CORS
 from dotenv import load_dotenv
+from modules.extensions import socketio
 from routes.job_search_routes import job_search_blueprint
-import os
-import logging
 
 # Load environment variables from .env file
 load_dotenv(".env.development")
 
 app = Flask(__name__)
-
-# Enable CORS only in development environment
-if os.getenv("FLASK_ENV") == "development":
-    CORS(app)
+CORS(app)
 
 # Set up logging
 if os.getenv("FLASK_DEBUG") == "1":
@@ -27,5 +25,8 @@ logger = logging.getLogger(__name__)
 
 app.register_blueprint(job_search_blueprint, url_prefix="/search")
 
+socketio.init_app(app)
+print("Socketio initialized")
+
 if __name__ == "__main__":
-    app.run(debug=os.getenv("FLASK_DEBUG") == "1", port=os.getenv("FLASK_RUN_PORT"))
+    socketio.run(app, debug=os.getenv("FLASK_DEBUG") == "1", port=os.getenv("FLASK_RUN_PORT"))

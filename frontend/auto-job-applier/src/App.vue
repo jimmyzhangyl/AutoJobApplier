@@ -62,6 +62,13 @@
         <span v-else>Search</span>
       </button>
       <p v-if="error" class="text-red-500 mt-4">{{ error }}</p>
+
+      <div v-if="loading" class="mt-4">
+        <p>Processed Jobs: {{ progress.processed_jobs }}</p>
+        <p>Total Jobs: {{ progress.total_jobs }}</p>
+        <p>Remaining Jobs: {{ progress.remaining_jobs }}</p>
+        <p>Estimated Time Left: {{ progress.estimated_time_left }} seconds</p>
+      </div>
     </div>
 
     <div v-if="results.length > 0" class="mt-8">
@@ -89,11 +96,12 @@
 </template>
 
 <script>
-// import axios from "axios";
+import axios from "axios";
 import InputBox from "./components/InputBox.vue";
 import MultiSelect from "./components/MultiSelect.vue";
 import ResultFrame from "./components/ResultFrame.vue";
 import JobDetails from "./components/JobDetails.vue";
+import io from "socket.io-client";
 
 export default {
   name: "App",
@@ -128,7 +136,7 @@ export default {
         { value: "Contract/Temp", label: "Contract/Temp" },
         { value: "Casual/Vacation", label: "Casual/Vacation" },
       ],
-      jobSources: [{ value: "seek", label: "Seek" }],
+      jobSources: [{ value: "Seek", label: "Seek" }],
       errors: {
         titleIncludes: null,
         locationIncludes: null,
@@ -139,7 +147,19 @@ export default {
       loading: false,
       error: null,
       selectedJob: null,
+      progress: {
+        processed_jobs: 0,
+        total_jobs: 0,
+        remaining_jobs: 0,
+        estimated_time_left: 0,
+      },
     };
+  },
+  created() {
+    this.socket = io(process.env.VUE_APP_API_URL);
+    this.socket.on("job_progress", (data) => {
+      this.progress = data;
+    });
   },
   methods: {
     async searchJobs() {
@@ -157,15 +177,20 @@ export default {
 
       this.loading = true;
       this.error = null;
+      this.progress = {
+        processed_jobs: 0,
+        total_jobs: 0,
+        remaining_jobs: 0,
+        estimated_time_left: 0,
+      };
 
       try {
-        // uncommit this block of code to fetch jobs from the API
-        // const response = await axios.post(
-        //   `${process.env.VUE_APP_API_URL}/search/`,
-        //   this.filters
-        // );
-        // this.results = response.data;
-        this.results = require("@/assets/jobSearchSample.json");
+        const response = await axios.post(
+          `${process.env.VUE_APP_API_URL}/search/`,
+          this.filters
+        );
+        this.results = response.data;
+        // this.results = require("@/assets/jobSearchSample.json");
         this.autoApplyJobs = this.results.filter((job) => job.type === "auto");
         this.manualApplyJobs = this.results.filter(
           (job) => job.type === "manual"
@@ -181,6 +206,11 @@ export default {
     showJobDetails(job) {
       this.selectedJob = job;
     },
+  },
+  beforeUnmount() {
+    if (this.socket) {
+      this.socket.disconnect();
+    }
   },
 };
 </script>

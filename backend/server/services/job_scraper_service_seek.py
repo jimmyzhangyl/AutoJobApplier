@@ -3,10 +3,10 @@ import json
 import time
 import logging
 from bs4 import BeautifulSoup
+from modules.extensions import socketio
 
 SEEK_API_URL = "https://www.seek.com.au/api/chalice-search/v4/search"
 logger = logging.getLogger(__name__)
-
 
 def fetch_seek_jobs(location, keywords, page):
     params = {
@@ -19,12 +19,11 @@ def fetch_seek_jobs(location, keywords, page):
         logger.debug(f"Fetching jobs from Seek: {params}")
         response = requests.get(SEEK_API_URL, params=params)
         response.raise_for_status()
-        logger.debug(f"Received response: {len(response.json().get("data",[]))>0}")
+        logger.debug(f"Received response: {len(response.json().get('data', [])) > 0}")
         return response.json()
     except requests.RequestException as e:
         logger.error(f"Error fetching data from Seek: {e}")
         return None
-
 
 def apply_filters(job, filters):
     title_excludes = filters.get("titleExcludes", [])
@@ -144,7 +143,6 @@ def save_job_data(jobs, filename="jobs.json"):
         json.dump(jobs, file)
     logger.debug(f"Saved job data to {filename}")
 
-
 def search_jobs(data):
     location_includes = data.get("locationIncludes", [])
     title_includes = data.get("titleIncludes", "")
@@ -180,6 +178,9 @@ def search_jobs(data):
     all_jobs = []
     page = 1
     max_retries = 3
+    total_jobs = 0
+    processed_jobs = 0
+
     while True:
         for attempt in range(max_retries):
             seek_response = fetch_seek_jobs(location_includes, title_includes, page)
@@ -193,11 +194,13 @@ def search_jobs(data):
             break
 
         jobs = seek_response.get("data", [])
+        total_jobs = min(seek_response.get("totalCount", 0), 20 * 27) if page == 1 else total_jobs
         if not jobs:
             logger.debug("No jobs found in response")
             break
 
         for job in jobs:
+            processed_jobs += 1
             if apply_filters(job, filters):
                 logger.debug(f"Job {job['id']} added to results")
                 all_jobs.append({
@@ -208,7 +211,19 @@ def search_jobs(data):
                     "description": job.get("description", fetch_job_description(job["id"])),
                     "type": "auto" if support_quick_apply(job['id']) else "manual",
                     "applyLink": f"https://www.seek.com.au/job/{job['id']}/apply",
-                    })
+                })
+
+            # Send progress update
+            remaining_jobs = total_jobs - processed_jobs
+            estimated_time_left = remaining_jobs * 3
+            progress_data = {
+                "processed_jobs": processed_jobs,
+                "total_jobs": total_jobs,
+                "remaining_jobs": remaining_jobs,
+                "estimated_time_left": estimated_time_left
+            }
+            socketio.emit('job_progress', progress_data)
+
         page += 1
 
     save_job_data(all_jobs)
