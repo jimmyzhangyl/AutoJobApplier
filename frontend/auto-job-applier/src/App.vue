@@ -53,7 +53,6 @@
           hint="Only support Seek at the moment"
         />
       </div>
-      <div>{{ filters }}</div>
       <button
         @click="searchJobs"
         :disabled="loading"
@@ -66,20 +65,35 @@
     </div>
 
     <div v-if="results.length > 0" class="mt-8">
-      <h2 class="text-2xl font-bold mb-4">Search Results</h2>
+      <h2 class="text-2xl font-bold mb-4 text-center">Search Results</h2>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <ResultFrame title="Auto Apply Supported" :jobs="autoApplyJobs" />
-        <ResultFrame title="Need to Manually Apply" :jobs="manualApplyJobs" />
+        <ResultFrame
+          title="Auto Apply Supported"
+          :jobs="autoApplyJobs"
+          @showJobDetails="showJobDetails"
+        />
+        <ResultFrame
+          title="Need to Manually Apply"
+          :jobs="manualApplyJobs"
+          @showJobDetails="showJobDetails"
+        />
       </div>
     </div>
+
+    <JobDetails
+      v-if="selectedJob"
+      :job="selectedJob"
+      @close="selectedJob = null"
+    />
   </div>
 </template>
 
 <script>
-import axios from "axios";
+// import axios from "axios";
 import InputBox from "./components/InputBox.vue";
 import MultiSelect from "./components/MultiSelect.vue";
 import ResultFrame from "./components/ResultFrame.vue";
+import JobDetails from "./components/JobDetails.vue";
 
 export default {
   name: "App",
@@ -87,6 +101,7 @@ export default {
     InputBox,
     MultiSelect,
     ResultFrame,
+    JobDetails,
   },
   data() {
     return {
@@ -123,6 +138,7 @@ export default {
       manualApplyJobs: [],
       loading: false,
       error: null,
+      selectedJob: null,
     };
   },
   methods: {
@@ -143,11 +159,13 @@ export default {
       this.error = null;
 
       try {
-        const response = await axios.post(
-          `${process.env.VUE_APP_API_URL}/search/`,
-          this.filters
-        );
-        this.results = response.data;
+        // uncommit this block of code to fetch jobs from the API
+        // const response = await axios.post(
+        //   `${process.env.VUE_APP_API_URL}/search/`,
+        //   this.filters
+        // );
+        // this.results = response.data;
+        this.results = require("@/assets/jobSearchSample.json");
         this.autoApplyJobs = this.results.filter((job) => job.type === "auto");
         this.manualApplyJobs = this.results.filter(
           (job) => job.type === "manual"
@@ -159,6 +177,9 @@ export default {
       } finally {
         this.loading = false;
       }
+    },
+    showJobDetails(job) {
+      this.selectedJob = job;
     },
   },
 };

@@ -207,6 +207,7 @@ def search_jobs(data):
                     "listingDate": job.get("listingDate", ""),
                     "description": job.get("description", fetch_job_description(job["id"])),
                     "type": "auto" if support_quick_apply(job['id']) else "manual",
+                    "applyLink": f"https://www.seek.com.au/job/{job['id']}/apply",
                     })
         page += 1
 
