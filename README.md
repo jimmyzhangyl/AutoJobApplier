@@ -1,25 +1,29 @@
-# AutoJobApplier
-Automate your next job application process
+# Project Name
 
-backend framework: python/flask
+## Description
 
-## Prerequisites
-- Python 3.8 or higher
+[Provide a brief description of your project]
 
-## Installation Instructions - backend
-1.Initiate virtual environment for python/flask:
-run `python -m venv venv` under backend/
+## Features
 
-2.Activate the virtual environment.
-- On Windows: `.\venv\Scripts\activate`
-- On macOS/Linux:`source venv/bin/activate`
+- [List the main features of your project]
 
-3.Install the required dependencies.
-`pip install -r requirements.txt`
+## Installation
 
-4.Start the Flask application.
-`python server/app.py`
+[Provide instructions on how to install and set up your project]
 
-0.Update requirement file
--active the virtual environment
--run `pip freeze > requirement.txt` in (venv) ..\AutoJobApplier\backend>
+## Usage
+
+[Explain how to use your project, including any necessary commands or configurations]
+
+## Contributing
+
+[Specify how others can contribute to your project, including guidelines for pull requests and code reviews]
+
+## License
+
+[Specify the license under which your project is released]
+
+## Contact
+
+[Provide contact information for users to reach out to you]
