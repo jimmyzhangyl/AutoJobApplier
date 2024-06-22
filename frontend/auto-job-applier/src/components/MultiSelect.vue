@@ -45,17 +45,39 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
+import {
+  defineComponent,
+  ref,
+  computed,
+  onMounted,
+  onBeforeUnmount,
+} from "vue";
 import { QuestionMarkCircleIcon } from "@heroicons/vue/24/solid";
 
-export default {
+export default defineComponent({
   name: "MultiSelect",
   props: {
-    label: String,
-    hint: String,
-    options: Array,
-    modelValue: Array,
-    error: String,
+    label: {
+      type: String,
+      required: true,
+    },
+    hint: {
+      type: String,
+      required: false,
+    },
+    options: {
+      type: Array as () => Array<{ value: string; label: string }>,
+      required: true,
+    },
+    modelValue: {
+      type: Array as () => string[],
+      required: true,
+    },
+    error: {
+      type: String,
+      required: false,
+    },
     required: {
       type: Boolean,
       default: false,
@@ -64,56 +86,70 @@ export default {
   components: {
     QuestionMarkCircleIcon,
   },
-  data() {
-    return {
-      showDropdown: false,
-      showHint: false,
-    };
-  },
-  computed: {
-    selectedLabels() {
-      return this.options
-        .filter((option) => this.modelValue.includes(option.value))
+  setup(props, { emit }) {
+    const showDropdown = ref(false);
+    const showHint = ref(false);
+    const dropdownContainer = ref<HTMLElement | null>(null);
+
+    const selectedLabels = computed(() => {
+      return props.options
+        .filter((option) => props.modelValue.includes(option.value))
         .map((option) => option.label);
-    },
-  },
-  methods: {
-    toggleDropdown() {
-      this.showDropdown = !this.showDropdown;
-    },
-    selectOption(value) {
-      let newValue;
+    });
+
+    const toggleDropdown = () => {
+      showDropdown.value = !showDropdown.value;
+    };
+
+    const selectOption = (value: string) => {
+      let newValue = [...props.modelValue];
       if (value === "All Australia") {
-        newValue = this.modelValue.includes("All Australia")
+        newValue = props.modelValue.includes("All Australia")
           ? []
           : ["All Australia"];
       } else {
-        newValue = this.modelValue.filter((v) => v !== "All Australia");
+        newValue = newValue.filter((v) => v !== "All Australia");
         if (newValue.includes(value)) {
           newValue = newValue.filter((v) => v !== value);
         } else {
           newValue.push(value);
         }
       }
-      this.$emit("update:modelValue", newValue);
-    },
-    isSelected(value) {
-      return this.modelValue.includes(value);
-    },
-    handleClickOutside(event) {
-      const dropdownContainer = this.$refs.dropdownContainer;
-      if (dropdownContainer && !dropdownContainer.contains(event.target)) {
-        this.showDropdown = false;
+      emit("update:modelValue", newValue);
+    };
+
+    const isSelected = (value: string) => {
+      return props.modelValue.includes(value);
+    };
+
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownContainer.value &&
+        !dropdownContainer.value.contains(event.target as Node)
+      ) {
+        showDropdown.value = false;
       }
-    },
+    };
+
+    onMounted(() => {
+      document.addEventListener("click", handleClickOutside);
+    });
+
+    onBeforeUnmount(() => {
+      document.removeEventListener("click", handleClickOutside);
+    });
+
+    return {
+      showDropdown,
+      showHint,
+      dropdownContainer,
+      selectedLabels,
+      toggleDropdown,
+      selectOption,
+      isSelected,
+    };
   },
-  mounted() {
-    document.addEventListener("click", this.handleClickOutside);
-  },
-  beforeUnmount() {
-    document.removeEventListener("click", this.handleClickOutside);
-  },
-};
+});
 </script>
 
 <style scoped>

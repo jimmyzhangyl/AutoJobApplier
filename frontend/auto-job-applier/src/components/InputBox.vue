@@ -23,40 +23,53 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
+import { defineComponent, ref, computed } from "vue";
 import { QuestionMarkCircleIcon } from "@heroicons/vue/24/solid";
 
-export default {
+export default defineComponent({
   name: "InputBox",
+  components: {
+    QuestionMarkCircleIcon,
+  },
   props: {
-    label: String,
-    hint: String,
-    modelValue: String,
-    error: String,
+    label: {
+      type: String,
+      required: true,
+    },
+    hint: {
+      type: String,
+      required: false,
+    },
+    modelValue: {
+      type: String,
+      required: true,
+    },
+    error: {
+      type: String,
+      required: false,
+    },
     required: {
       type: Boolean,
       default: false,
     },
   },
-  data() {
+  setup(props, { emit }) {
+    const showHint = ref(false);
+
+    const value = computed({
+      get: () => props.modelValue,
+      set: (val: string) => {
+        emit("update:modelValue", val);
+      },
+    });
+
     return {
-      showHint: false,
+      showHint,
+      value,
     };
   },
-  components: {
-    QuestionMarkCircleIcon,
-  },
-  computed: {
-    value: {
-      get() {
-        return this.modelValue;
-      },
-      set(value) {
-        this.$emit("update:modelValue", value);
-      },
-    },
-  },
-};
+});
 </script>
 
 <style scoped>

@@ -4,7 +4,7 @@
     <div class="overflow-y-scroll h-96">
       <div
         v-for="job in jobs"
-        :key="job.title"
+        :key="job.id"
         class="border-b border-gray-300 py-2 cursor-pointer"
         @click="$emit('showJobDetails', job)"
       >
@@ -14,12 +14,21 @@
   </div>
 </template>
 
-<script>
-export default {
+<script lang="ts">
+import { defineComponent, PropType } from "vue";
+import { Job } from "@/models/Job";
+
+export default defineComponent({
   name: "ResultFrame",
   props: {
-    title: String,
-    jobs: Array,
+    title: {
+      type: String,
+      required: true,
+    },
+    jobs: {
+      type: Array as PropType<Job[]>,
+      required: false,
+    },
   },
-};
+});
 </script>
