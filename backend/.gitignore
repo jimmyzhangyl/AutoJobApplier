@@ -1,4 +1,4 @@
 venv
 __pycache__/
-server\app_debug.log
-server\jobs.json
+app_debug.log
+jobs.json
