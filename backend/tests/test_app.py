@@ -3,6 +3,7 @@ from flask import Flask
 from flask.testing import FlaskClient
 from unittest.mock import patch
 from server.app import create_app
+from tests.sample_data import valid_filter
 
 
 @pytest.fixture
@@ -41,7 +42,7 @@ def test_app_initialization(
 
 # Testing for post request
 def test_app_blueprints(client: FlaskClient):
-    response = client.post("/search/", json={})
+    response = client.post("/search/", json=valid_filter)
     assert response.status_code in [
         200,
         404,
