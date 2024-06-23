@@ -3,7 +3,7 @@ import json
 import time
 import logging
 from bs4 import BeautifulSoup
-from models.extensions import socketio
+from server.utils.socketio import socketio
 
 SEEK_API_URL = "https://www.seek.com.au/api/chalice-search/v4/search"
 logger = logging.getLogger(__name__)

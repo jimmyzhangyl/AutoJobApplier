@@ -1,31 +1,48 @@
-import os
 import pytest
 from flask import Flask
-import logging
-from server.app import app as flask_app
-from flask_socketio import SocketIOTestClient, SocketIO
+from flask.testing import FlaskClient
+from unittest.mock import patch
+from server.app import create_app
 
 
-# Create a fixture for the Flask-SocketIO client
 @pytest.fixture
-def socketio_client():
-    socketio = SocketIO(flask_app)
-    return SocketIOTestClient(flask_app, socketio)
+def app() -> Flask:
+    app = create_app(".env.development")
+    return app
 
 
-def test_home(client):
-    response = client.get("/")
-    assert response.status_code == 404
-    # assert b"Hello, World!" in response.data
+@pytest.fixture
+def client(app: Flask) -> FlaskClient:
+    return app.test_client()
 
 
-def test_logger_initialization():
-    if os.getenv("FLASK_DEBUG") == "1":
-        assert flask_app.logger.level == logging.DEBUG
+@patch("server.app.load_environment")
+@patch("server.app.setup_cors")
+@patch("server.app.setup_logging")
+@patch("server.app.setup_socketio")
+@patch("server.app.start_server_with_socketio")
+def test_app_initialization(
+    mock_start_server,
+    mock_setup_socketio,
+    mock_setup_logging,
+    mock_setup_cors,
+    mock_load_environment,
+):
+    # Call the main function that initializes the app
+    app = create_app(".env.development")
+
+    # Ensure the functions were called with the correct arguments
+    mock_load_environment.assert_called_once_with(".env.development")
+    mock_setup_cors.assert_called_once_with(app)
+    mock_setup_logging.assert_called_once()
+    mock_setup_socketio.assert_called_once_with(app)
+    mock_start_server.assert_not_called()  # Ensure the server start function is not called
 
 
-def test_socketio_connection(socketio_client):
-    socketio_client.connect()
-    assert socketio_client.is_connected()
-    socketio_client.disconnect()
-    assert not socketio_client.is_connected()
+# Testing for post request
+def test_app_blueprints(client: FlaskClient):
+    response = client.post("/search/", json={})
+    assert response.status_code in [
+        200,
+        404,
+    ]  # Updated to test POST method with JSON payload

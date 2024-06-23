@@ -12,17 +12,25 @@ job_search_blueprint = Blueprint("job_search", __name__)
 
 @job_search_blueprint.route("/", methods=["POST"])
 def search_jobs_route():
+    # Receiving data from the request
     data = request.json
     try:
+        # Expecting passed in data aligned with data format of JobFilter
         search_filters = JobFilter(**data)
         logger.debug(f"Received search request with data: {search_filters}")
     except TypeError as e:
         logger.error(f"Error parsing search filters: {e}")
         return jsonify({"error": "Invalid search filters"}), 400
-    # FIXME wrapped whole thing within try except block, so we can properly handle errors and status
-    print(search_filters)
-    result = search_seek_jobs_selenium(
-        search_filters
-    )  # FIXME returned value should be an array of Job objects
-    logger.debug(f"Returning search results with {len(result)} jobs")
-    return jsonify(result)  # FIXME give proper state of 200
+
+    # Passing the search filters to the job scraper service
+    try:
+        # FIXME: job source as a filter is not implemented yet
+        result = search_seek_jobs_selenium(search_filters)
+        logger.debug(f"Returning search results with {len(result)} jobs")
+        return jsonify(result), 200
+    # except JobScraperError as e:
+    #     logger.error(f"Error during job search: {e}")
+    #     return jsonify({"error": str(e)}), e.status_code
+    except Exception as e:
+        logger.error(f"Unexpected error: {e}")
+        return jsonify({"error": "Internal server error"}), 500

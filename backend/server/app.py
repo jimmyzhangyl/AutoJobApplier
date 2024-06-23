@@ -1,47 +1,26 @@
-import os
-import logging
 from flask import Flask
-from flask_cors import CORS
-from dotenv import load_dotenv
-from models.extensions import socketio
 from routes.job_search_routes import job_search_blueprint
+from utils.helper import load_environment, setup_cors, setup_logging
+from utils.socketio import setup_socketio, start_server_with_socketio
 
-# Load environment variables from .env file
-load_dotenv(os.path.join(os.path.dirname(__file__), ".env.development"))
 
-app = Flask(__name__)
-CORS(app)
+def create_app(env):
+    app = Flask(__name__)
 
-# Clear the console
-os.system("cls" if os.name == "nt" else "clear")
+    # use the ".env.development" file for development or the ".env.production" file for production
+    load_environment(env)
 
-# checking loaded environment variables
-print(
-    "\nLoaded environment variables: ",
-    "Debug=",
-    os.getenv("FLASK_DEBUG"),
-    ",Port=",
-    os.getenv("FLASK_RUN_PORT"),
-)
+    setup_cors(app)
+    setup_logging()
+    setup_socketio(app)
 
-# Set up logging
-if os.getenv("FLASK_DEBUG") == "1":
-    logging.basicConfig(
-        level=logging.DEBUG,
-        filename="app_debug.log",
-        filemode="w",
-        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    )
-    logger = logging.getLogger(__name__)
-    logger.debug("Logger initialized")
-    print("Logger initialized: ", logger.name)
+    # Route binding
+    app.register_blueprint(job_search_blueprint, url_prefix="/search")
 
-app.register_blueprint(job_search_blueprint, url_prefix="/search")
+    return app
 
-socketio.init_app(app)
-print("Socketio initialized")
+
+app = create_app(".env.development")
 
 if __name__ == "__main__":
-    socketio.run(
-        app, debug=os.getenv("FLASK_DEBUG") == "1", port=os.getenv("FLASK_RUN_PORT")
-    )
+    start_server_with_socketio(app)
