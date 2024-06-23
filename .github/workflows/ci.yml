@@ -45,8 +45,12 @@ jobs:
           pip install .
         working-directory: ./backend
 
+      - name: Verify tests directory exists
+        run: ls -la tests
+        working-directory: ./backend
+
       - name: Run backend tests
         run: |
           source venv/bin/activate
-          pytest backend/tests
+          pytest tests
         working-directory: ./backend
