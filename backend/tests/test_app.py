@@ -45,4 +45,4 @@ def test_app_blueprints(client: FlaskClient):
     assert response.status_code in [
         200,
         404,
-    ]  # Updated to test POST method with JSON payload
+    ], f"Unexpected status code: {response.status_code}, response data: {response.data.decode()}"

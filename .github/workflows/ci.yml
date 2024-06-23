@@ -49,6 +49,9 @@ jobs:
         run: ls -la tests
         working-directory: ./backend
 
+      - name: Print environment variables
+        run: printenv
+
       - name: Run backend tests
         run: |
           source venv/bin/activate
