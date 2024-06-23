@@ -2,36 +2,76 @@
 
 Automate your next job application process
 
-Backend framework: python/flask
-Frontend framwork: Vue.js
+## How it works?
 
-## Prerequisites
+Step1: Collect user searching critals (user submit form in frontend application)
+Step2: Seaching on job ads platforms (only support Seek at the moment)
+Step3: Scrap job details and filted with user critals <-- Current stage
+Step4: Ask ChatGPT model preparing cover letter
+Step5: Submit application with Selenium
 
-- Python 3.8 or higher
+### Seek model: key parts
 
-## Installation Instructions - backend
+Critical css elements and workflows: Manually figure out from seek.com
 
-1.Initiate virtual environment for python/flask:
-run `python -m venv venv` under backend/
+## Developer manual
 
-2.Activate the virtual environment.
+Python 3.8 or higher
+Framework: python/flask
 
-- On Windows: `.\venv\Scripts\activate`
-- On macOS/Linux:`source venv/bin/activate`
+## Installation Instructions
 
-  3.Install the required dependencies.
+1.Initialize Virtual Environment
+Navigate to the backend directory and run:
+`python -m venv venv`
+
+2.Activate the virtual environment
+
+- On Windows:
+  `.\venv\Scripts\activate`
+- On macOS/Linux:
+  `source venv/bin/activate`
+
+  3.Install the required dependencies
+  It is recommended to install from setup.py in the backend folder:
+  `pip install .`
+  Alternatively, you can install from requirements.txt:
   `pip install -r requirements.txt`
 
   4.Start the Flask application.
   `python server/app.py`
 
-  0.Update requirement file
-  -active the virtual environment
-  -run `pip freeze > requirement.txt` in (venv) ..\AutoJobApplier\backend>
+## Helpful commands and tips
 
-## DEBUG
+### Testing
 
-in app.py, loading the corresponding .env.development for debug purpose, it will enable the logger.
-API results will write to jobs.json and logger traces are located in app_debug.log
+`pytest`
 
-## Quick devolope TODO list
+### Updating Requirements File
+
+Ensure your virtual environment is active.
+Update requirements.txt
+`pip freeze > requirements.txt`
+
+### Uninstall All Packages
+
+-On Windows
+`pip freeze | ForEach-Object { pip uninstall -y $_ }`
+-On Unix-based systems
+`pip freeze | xargs pip uninstall -y`
+
+### Debugging
+
+In app.py, ensure you are loading the appropriate .env.development file for debugging purposes. This will enable logging.
+-API results will be written to jobs.json.
+-Logger traces can be found in app_debug.log.
+
+## Future devolope TODO list
+
+- integrate with firebase, allow user login with google account
+- DB to store searched job ids & user related info(resume, specialized gpt prompts)
+- job apply report & auto apply schedule
+- Follow up email for unrecorded questions
+- Enhance unrecorded questions with prefilled answer from GPT, but need comfirm from user
+- secure payment mothods if deploy to public
+- generatic model, utlizing ChatGpt(Or train other LLMs) to find workflow and key css tags to complete the submission task
