@@ -5,20 +5,26 @@ on:
     branches:
       - main
       - master
+    paths:
+      - "frontend/**"
+      - "backend/**"
   pull_request:
     branches:
       - main
       - master
+    paths:
+      - "frontend/**"
+      - "backend/**"
 
 jobs:
-  test:
+  frontend-test:
     runs-on: ubuntu-latest
+    if: contains(github.event.head_commit.message, 'frontend')
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Frontend Steps
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
@@ -32,7 +38,14 @@ jobs:
         run: npm run test:unit
         working-directory: ./frontend/auto-job-applier
 
-      # Backend Steps
+  backend-test:
+    runs-on: ubuntu-latest
+    if: contains(github.event.head_commit.message, 'backend')
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
@@ -45,9 +58,11 @@ jobs:
 
       - name: Install ChromeDriver
         run: |
-          wget -N https://chromedriver.storage.googleapis.com/$(wget -qO- https://chromedriver.storage.googleapis.com/LATEST_RELEASE)/chromedriver_linux64.zip
-          unzip chromedriver_linux64.zip
-          sudo mv chromedriver /usr/bin/chromedriver
+          CHROME_VERSION=$(google-chrome --version | grep -oE '[0-9.]+')
+          CHROMEDRIVER_VERSION=$(curl -s "https://googlechromelabs.github.io/chrome-for-testing/latest-patch-versions-with-downloads.json" | jq -r --arg CHROME_VERSION "$CHROME_VERSION" '.chrome.versions[$CHROME_VERSION] | .chromedriver')
+          wget -N "https://edgedl.me.gvt1.com/edgedl/chrome/chrome-for-testing/$CHROMEDRIVER_VERSION/linux64/chromedriver-linux64.zip"
+          unzip chromedriver-linux64.zip
+          sudo mv chromedriver-linux64/chromedriver /usr/bin/chromedriver
           sudo chown root:root /usr/bin/chromedriver
           sudo chmod +x /usr/bin/chromedriver
 
