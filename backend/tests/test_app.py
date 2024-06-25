@@ -40,10 +40,12 @@ def test_app_initialization(
     mock_start_server.assert_not_called()  # Ensure the server start function is not called
 
 
-# Testing for post request
-def test_app_blueprints(client: FlaskClient):
+# @patch("server.routes.job_search_routes.search_seek_jobs_selenium")
+def test_app_blueprints(mocker, client: FlaskClient, driver):
+    mock_search_jobs = mocker.patch(
+        "server.routes.job_search_routes.search_seek_jobs_selenium"
+    )
+    mock_search_jobs.return_value = []
     response = client.post("/search/", json=valid_filter)
-    assert response.status_code in [
-        200,
-        404,
-    ], f"Unexpected status code: {response.status_code}, response data: {response.data.decode()}"
+
+    assert response.status_code == 200

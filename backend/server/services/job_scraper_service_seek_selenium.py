@@ -20,7 +20,7 @@ from models.job_filter_model import JobFilter
 
 def get_selenium_driver():
     options = Options()
-    options.headless = False
+    # options.add_argument("--headless=new")
     # uncomment to choose which driver to use, usage: webdriver.Chrome(service=service, options=options)
     # driver_path = os.getenv("CHROMEDRIVER_PATH")
     # service = Service(driver_path)

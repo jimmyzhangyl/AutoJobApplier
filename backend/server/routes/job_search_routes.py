@@ -1,7 +1,7 @@
 import logging
 from flask import Blueprint, request, jsonify
 from models.job_filter_model import JobFilter
-from services.job_scraper_service_seek_selenium import (
+from server.services.job_scraper_service_seek_selenium import (
     search_jobs as search_seek_jobs_selenium,
 )
 

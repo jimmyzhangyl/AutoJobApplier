@@ -4,6 +4,7 @@ from flask.testing import FlaskClient
 from server.routes.job_search_routes import job_search_blueprint
 from server.models.job_filter_model import JobFilter
 from tests.sample_data import valid_filter
+from unittest.mock import patch
 
 
 @pytest.fixture
@@ -18,10 +19,8 @@ def client(app: Flask) -> FlaskClient:
     return app.test_client()
 
 
-def test_search_jobs_route_valid(client: FlaskClient, mocker):
-    mock_search_jobs = mocker.patch(
-        "server.routes.job_search_routes.search_seek_jobs_selenium"
-    )
+@patch("server.routes.job_search_routes.search_seek_jobs_selenium")
+def test_search_jobs_route_valid(mock_search_jobs, client: FlaskClient, driver):
     mock_search_jobs.return_value = []
 
     response = client.post("/search/", json=valid_filter)
@@ -35,7 +34,8 @@ def test_search_jobs_route_valid(client: FlaskClient, mocker):
     )
 
 
-def test_search_jobs_route_invalid(client: FlaskClient):
+@patch("server.routes.job_search_routes.search_seek_jobs_selenium")
+def test_search_jobs_route_invalid(mock_search_jobs, client: FlaskClient, driver):
     invalid_data = {
         "titleIncludes": "Software",  # Invalid: should be a list
     }
@@ -46,7 +46,7 @@ def test_search_jobs_route_invalid(client: FlaskClient):
     assert "Invalid search filters" in response.json["error"]
 
 
-def test_search_jobs_route_internal_error(client: FlaskClient, mocker):
+def test_search_jobs_route_internal_error(mocker, client: FlaskClient, driver):
     mock_search_jobs = mocker.patch(
         "server.routes.job_search_routes.search_seek_jobs_selenium"
     )

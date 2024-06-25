@@ -1,7 +1,7 @@
 # backend/tests/sample_data.py
 
 valid_filter = {
-    "titleIncludes": ["Software"],
+    "titleIncludes": ["Software Engineer"],
     "titleExcludes": ["Manager"],
     "locationIncludes": ["All Canberra ACT"],
     "locationExcludes": ["Sydney NSW"],
