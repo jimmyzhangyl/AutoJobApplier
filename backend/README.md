@@ -41,6 +41,17 @@ Navigate to the backend directory and run:
   4.Start the Flask application.
   `python server/app.py`
 
+Q: showing errors like `Import "flask" could not be resolved`
+A: Means your python interpeter path is incorrect, it is not pointing to current venv that contains lib this project need.
+known issue with mac: you may have an alias config to override python path. To check this run `alias` in your terminal
+-Temporaty disable alias: `unalias python`
+-Permanently Remove or Modify the Alias, comment out line with `#` or delete the line 
+    --If you are using zsh (the default shell on macOS Catalina and later):`nano ~/.zshrc`
+    --For bash (if you're using an older shell or have switched):`nano ~/.bashrc`
+    --For bash on login shells:`nano ~/.bash_profile`
+  remember to reload the shell configuration `source ~/.zshrc` (If you edited a different file, replace ~/.zshrc with the appropriate file path.)
+(ref to this article https://www.reddit.com/r/learnpython/comments/1azfh5r/pythons_path_on_macos/)
+
 ## Helpful commands and tips
 
 ### Testing

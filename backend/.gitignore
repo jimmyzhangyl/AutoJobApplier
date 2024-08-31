@@ -10,3 +10,5 @@ build/
 app_debug.log
 jobs.json
 
+#macOS generated files
+.DS_Store
